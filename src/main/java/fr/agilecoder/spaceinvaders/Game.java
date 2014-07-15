@@ -16,6 +16,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
 import java.util.List;
 
@@ -86,6 +88,7 @@ public class Game extends Canvas {
         logger.info("add key listener");
 
         this.addKeyListener(new KeyInputHandler());
+        container.addWindowListener(new WindowHandler());
 
         logger.info("main loop");
 
@@ -133,7 +136,7 @@ public class Game extends Canvas {
             // surface and blank it out
             Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
             g.setColor(Color.black);
-            g.fillRect(0,0,820,620);
+            g.fillRect(-10,-10,810,610);
 
             handleActions();
 
@@ -321,4 +324,40 @@ public class Game extends Canvas {
         }
     }
 
+    private class WindowHandler implements WindowListener {
+        @Override
+        public void windowOpened(WindowEvent windowEvent) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void windowClosing(WindowEvent windowEvent) {
+            System.exit(0);
+        }
+
+        @Override
+        public void windowClosed(WindowEvent windowEvent) {
+            System.exit(0);
+        }
+
+        @Override
+        public void windowIconified(WindowEvent windowEvent) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void windowDeiconified(WindowEvent windowEvent) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void windowActivated(WindowEvent windowEvent) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void windowDeactivated(WindowEvent windowEvent) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+    }
 }
