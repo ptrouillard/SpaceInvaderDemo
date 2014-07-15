@@ -12,6 +12,5 @@ public interface SpaceInvaderActionEnum extends ActionEnum {
     public final static int NO_COLLISION_DETECTED = 12;
     public final static int NOTIFY_DEATH = 13;
     public final static int COLLISION_WITHOUT_EFFECT = 14;
-    public final static int KILL_SHOT_AND_ALIEN = 15;
     public final static int LOGIC_DONE = 16;
 }

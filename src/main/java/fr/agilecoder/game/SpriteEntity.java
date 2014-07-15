@@ -1,5 +1,6 @@
 package fr.agilecoder.game;
 
+import fr.agilecoder.spaceinvaders.entities.Alien;
 import fr.agilecoder.spaceinvaders.entities.SpaceInvaderActionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,14 +33,14 @@ public abstract class SpriteEntity implements Entity {
 
     @Override
     public int move(long delta) {
-        logger.info("move x: {}, y: {}, dx: {}, dy: {}", x,y,dx,dy);
+        //logger.info("move x: {}, y: {}, dx: {}, dy: {}", x,y,dx,dy);
         x += (delta * dx) / 1000;
         y += (delta * dy) / 1000;
         return ActionEnum.MOVED;
     }
 
     public void draw(Graphics2D g) {
-        sprite.draw(g,(int) x,(int) y);
+        sprite.draw(g, x, y);
     }
 
     public int collidesWith(SpriteEntity other) {
@@ -90,6 +91,16 @@ public abstract class SpriteEntity implements Entity {
         return dy;
     }
 
+    public SpriteEntity withDy(int dy) {
+        this.dy = dy;
+        return this;
+    }
+
+    public SpriteEntity withDx(int dx) {
+        this.dx = dx;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "SpriteEntity{" +
@@ -99,4 +110,5 @@ public abstract class SpriteEntity implements Entity {
                 ", dy=" + dy +
                 '}';
     }
+
 }

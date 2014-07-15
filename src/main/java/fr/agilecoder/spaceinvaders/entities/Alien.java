@@ -19,17 +19,12 @@ public class Alien extends SpriteEntity {
 
     @Override
     public int move(long delta) {
-        // if we have reached the left hand side of the screen and
-        // are moving left then request a logic update
         if ((dx < 0) && (x < 10)) {
             return SpaceInvaderActionEnum.UPDATE_LOGIC;
         }
-        // and vice vesa, if we have reached the right hand side of
-        // the screen and are moving right, request a logic update
         if ((dx > 0) && (x > 750)) {
             return SpaceInvaderActionEnum.UPDATE_LOGIC;
         }
-
         // proceed with normal move
         return super.move(delta);
     }

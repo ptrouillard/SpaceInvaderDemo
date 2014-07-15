@@ -39,15 +39,26 @@ public class Game extends Canvas {
     private boolean rightPressed;
     private boolean firePressed;
     private long lastFire;
-    private long firingInterval = 1000L;
-    private int moveSpeed = 20; // speed of ship
     private boolean logicRequiredThisLoop = true;
+
+    // settings
+    private int alien_dx = 10;           // speed of alien
+    private int shot_dy = -250;           // speed of shot
+    private int ship_dx = 250;            // speed of ship
+    private long firingInterval = 250L;   // interval between two shots
+
+    // prepare sprites
+    private Sprite shotSprite = SpriteStore.get().getSprite("sprites/shot.gif");
+    private Sprite shipSprite = SpriteStore.get().getSprite("sprites/ship.gif");
+    private Sprite alienSprite = SpriteStore.get().getSprite("sprites/alien.gif");
 
     public static void main(String[] args) {
         new Game();
     }
 
     public Game() {
+
+        logger.info("Starting game");
         JFrame container = new JFrame("Space Invaders 101");
         JPanel panel = (JPanel) container.getContentPane();
         panel.setPreferredSize(new Dimension(800,600));
@@ -57,34 +68,51 @@ public class Game extends Canvas {
 
         setIgnoreRepaint(true);
 
+        logger.info("pack");
+
         container.pack();
         container.setResizable(false);
         container.setVisible(true);
 
+        logger.info("create buffer strategy");
+
         createBufferStrategy(2);
         strategy = getBufferStrategy();
 
+        logger.info("init entities");
+
         initEntities();
 
-        addKeyListener(new KeyInputHandler());
+        logger.info("add key listener");
+
+        this.addKeyListener(new KeyInputHandler());
+
+        logger.info("main loop");
 
         mainLoop();
     }
 
     private void initEntities() {
 
-        Sprite shipSprite = SpriteStore.get().getSprite("sprites/ship.gif");
-        Sprite alienSprite = SpriteStore.get().getSprite("sprites/alien.gif");
-
         // create the player ship and place it roughly in the center of the screen
-        ship = new Ship(shipSprite, 370, 550);
-        entities.add(ship);
+        initEntityShip();
 
         // create a block of aliens (5 rows, by 12 aliens, spaced evenly)
+        initEntityAliens(alienSprite);
+    }
+
+    private void initEntityShip() {
+        logger.info("initEntityShip");
+        ship = new Ship(shipSprite, 370, 550);
+        entities.add(ship);
+    }
+
+    private void initEntityAliens(Sprite alienSprite) {
+        logger.info("initEntityAliens");
         alienCount = 0;
         for (int row=0;row<5;row++) {
             for (int x=0;x<12;x++) {
-                Alien alien = new Alien(alienSprite, 100+(x*50), (50)+row*30);
+                Alien alien = (Alien)new Alien(alienSprite, 100+(x*50), (50)+row*30).withDx(alien_dx);
                 entities.add(alien);
                 alienCount++;
             }
@@ -92,18 +120,20 @@ public class Game extends Canvas {
     }
 
     private void mainLoop() {
+
         while (gameRunning) {
             // work out how long its been since the last update, this
             // will be used to calculate how far the entities should
             // move this loop
-            long delta = System.currentTimeMillis() - lastLoopTime;
-            lastLoopTime = System.currentTimeMillis();
+            //long delta = System.currentTimeMillis() - lastLoopTime;
+            //lastLoopTime = System.currentTimeMillis();
+            long delta = 100;
 
             // Get hold of a graphics context for the accelerated
             // surface and blank it out
             Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
             g.setColor(Color.black);
-            g.fillRect(0,0,800,600);
+            g.fillRect(0,0,820,620);
 
             handleActions();
 
@@ -147,13 +177,15 @@ public class Game extends Canvas {
                 int resultOfCollision = me.collidesWith(him);
                 switch(resultOfCollision) {
                     case SpaceInvaderActionEnum.COLLISION_DETECTED:
-                        logger.info("collision detected between {} and {}", me, him);
+                            removeEntity(me);
+                            removeEntity(him);
+                        if (me instanceof Alien)
+                            notifyAlienKilled();
+                        if (him instanceof Alien)
+                            notifyAlienKilled();
                         break;
                     case SpaceInvaderActionEnum.COLLISION_WITHOUT_EFFECT:
                     case SpaceInvaderActionEnum.NO_COLLISION_DETECTED:
-                        break;
-                    case SpaceInvaderActionEnum.KILL_SHOT_AND_ALIEN:
-                        notifyAlienKilled();
                         break;
                 }
             }
@@ -161,12 +193,14 @@ public class Game extends Canvas {
     }
 
     private void handleActions() {
+        logger.info("handle actions");
+
         ship.setDx(0);
 
         if ((leftPressed) && (!rightPressed)) {
-            ship.setDx(-moveSpeed);
+            ship.setDx(-ship_dx);
         } else if ((rightPressed) && (!leftPressed)) {
-            ship.setDx(moveSpeed);
+            ship.setDx(ship_dx);
         }
         // if we're pressing fire, attempt to fire
         if (firePressed) {
@@ -175,6 +209,8 @@ public class Game extends Canvas {
     }
 
     public void tryToFire() {
+        logger.info("tryToFire");
+
         // check that we have waiting long enough to fire
         if (System.currentTimeMillis() - lastFire < firingInterval) {
             return;
@@ -182,16 +218,17 @@ public class Game extends Canvas {
 
         // if we waited long enough, create the shot entity, and record the time.
         lastFire = System.currentTimeMillis();
-        Sprite shotSprite = SpriteStore.get().getSprite("sprites/shot.gif");
-        Shot shot = new Shot(shotSprite,ship.getX()+10,ship.getY()-30);
+        Shot shot = (Shot)new Shot(shotSprite,ship.getX()+10,ship.getY()-30).withDy(shot_dy);
         entities.add(shot);
     }
 
     private void moveEntities(long delta) {
+        logger.info("move entities");
 
         for (int i=0;i<entities.size();i++) {
             Entity entity = entities.get(i);
             int move = entity.move(delta);
+            logger.info("move entity {}", entity.toString());
             switch( move) {
                 case SpaceInvaderActionEnum.UPDATE_LOGIC:
                     updateLogic();
@@ -204,6 +241,7 @@ public class Game extends Canvas {
     }
 
     private void removeEntity(Entity entity) {
+        logger.info("remove entity {}", entity.toString());
         entities.remove(entity);
     }
 
@@ -232,10 +270,13 @@ public class Game extends Canvas {
     }
 
     public void updateLogic() {
+        logger.info("updateLogic");
+
         logicRequiredThisLoop = true;
     }
 
     private void drawEntities(Graphics2D g) {
+        logger.info("draw entities");
 
         for (int i=0;i<entities.size();i++) {
             Entity entity = entities.get(i);
@@ -247,13 +288,16 @@ public class Game extends Canvas {
 
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                logger.info("left key pressed") ;
                 leftPressed = true;
             }
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                 rightPressed = true;
+                logger.info("right key pressed") ;
             }
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 firePressed = true;
+                logger.info("space key pressed") ;
             }
         }
 

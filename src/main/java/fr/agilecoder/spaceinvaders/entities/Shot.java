@@ -24,6 +24,7 @@ public class Shot extends SpriteEntity {
         if (y < -100) {
             return SpaceInvaderActionEnum.ENTITY_REMOVED;
         }
+        logger.info("move x: {}, y: {}, dx: {}, dy: {}", x,y,dx,dy);
         return SpaceInvaderActionEnum.MOVED;
     }
 
@@ -35,7 +36,7 @@ public class Shot extends SpriteEntity {
     public int collidedWith(SpriteEntity other) {
         // if we've hit an alien, kill it!
         if (other instanceof Alien) {
-            return SpaceInvaderActionEnum.KILL_SHOT_AND_ALIEN;
+            return SpaceInvaderActionEnum.COLLISION_DETECTED;
         }
         return SpaceInvaderActionEnum.COLLISION_WITHOUT_EFFECT;
     }
